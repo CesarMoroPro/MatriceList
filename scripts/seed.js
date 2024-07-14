@@ -10,9 +10,6 @@ const bcrypt = require('bcrypt');
 const { db } = require('@vercel/postgres');
 //* Pour require les modules suivants, il faut les exporter avec module.exports, dans le fichier placeholder-data.js
 const { users, listes, tasks, invoices } = require('../src/app/lib/placeholder-data.js');
-const { create } = require('domain');
-
-console.log(listes);
 
 //= USERS
 /**
@@ -20,8 +17,8 @@ console.log(listes);
  * Dans son bloc TRY, elle fait 2 requêtes sql.
  *      - première requête : 
  *              -> client.sql = fait référence à la méthode "sql" fournie par la bibliothèque cliente SQL qui exécute une requête SQL. Nom qui varie selon la bibliothèque.
- *              -> CREATE EXTENSION IF NOT EXISTS "uuid-ossp" vérifie si l'extension "uuid-ossp" est déjà installée dans la DB. Si ce n'est pas le cas, elle l'installe. "uuid-ossp" génère des UUIDs, utiles pour créer des identifiants uniques dans une DB.
- *              -> createTable() crée la table users, qui va contenir les clés "id", "name", "email", et "password"
+ *              -> CREATE EXTENSION IF NOT EXISTS "uuid-ossp" vérifie si l'extension "uuid-ossp" est déjà installée dans la DB. Si ce n'est pas le cas, elle l'installe. "uuid-ossp" génère des UUIDs, utiles pour créer des identifiants aléatoires uniques dans une DB.
+ *              -> createTable() crée la table users, qui va contenir les clés "id", "firstname, "name", "email", et "password"
  * 
  *      - deuxième requête :
  *              -> insertedUsers() retourne un objet lorsque toutes les promesses sont tenues.
@@ -35,12 +32,13 @@ console.log(listes);
 async function seedUsers(client) {
     try {
         //* Vérification de l'existence de "uuid-ossp" et ajout si nécessaire
-        await client.sql`CREATE EXTENSION IF NOT EXISTS "uudi-ossp"`;
+        await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
         //* Création de la table "users" si elle n'existe pas déjà
         const createTable = await client.sql`
             CREATE TABLE IF NOT EXISTS users (
                 id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+                firstname VARCHAR(255) NOT NULL,
                 name VARCHAR(255) NOT NULL,
                 email TEXT NOT NULL UNIQUE,
                 password TEXT NOT NULL
@@ -54,8 +52,8 @@ async function seedUsers(client) {
             users.map(async (user) => {
                 const hashedPassword = await bcrypt.hash(user.password, 10);
                 return client.sql`
-                    INSERT INTO users (id, name, email, password)
-                    VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
+                    INSERT INTO users (id, firstname, name, email, password)
+                    VALUES (${user.id}, ${user.firstname}, ${user.name}, ${user.email}, ${hashedPassword})
                     ON CONFLICT (id) DO NOTHING;
                 `;
             }),
@@ -69,12 +67,10 @@ async function seedUsers(client) {
         };
 
     } catch (error) {
-        console.error('Error seeding users:', errors);
+        console.error('Error seeding users:', error);
         throw error;
     }
 }
-
-
 
 
 //= LISTES
@@ -89,7 +85,10 @@ async function seedListes(client) {
                 user_id UUID NOT NULL,
                 name VARCHAR(255) NOT NULL,
                 status VARCHAR(255) NOT NULL,
-                date DATE NOT NULL
+                date DATE NOT NULL,
+                /* Ci-dessous, on s'assure qu'une liste portant un nom A appartenant à un utilisateur Y ne peut pas être dupliquée.
+                Mais une liste portant le même nom qui appartiendrait à un autre utilisateur pourra être envoyée */
+                UNIQUE (user_id, name)
             );
         `;
 
@@ -97,12 +96,13 @@ async function seedListes(client) {
 
         //* Insertion des données dans la table "listes"
         const insertedListes = await Promise.all(
-            listes.map((list) =>  {
+            listes.map((list) => {
                 return client.sql`
-                INSERT INTO listes (user_id, name, status, date)
-                VALUES (${list.user_id}, ${list.name} ,${list.status}, ${list.date})
-                ON CONFLICT (id) DO NOTHING;
-            `}),
+                    INSERT INTO listes (user_id, name, status, date)
+                    VALUES (${list.user_id}, ${list.name}, ${list.status}, ${list.date})
+                    ON CONFLICT (id) DO NOTHING;
+                `;
+            }),
         );
 
         console.log(`Seeded ${insertedListes.length} listes`);
@@ -114,7 +114,10 @@ async function seedListes(client) {
 
     } catch (error) {
         console.error('Error seeding listes:', error);
-        throw error;
+        /* Throw error va stopper le script en cas d'erreur, ce qui posera problème pour envoyer en DB les infos suivantes (tasks, invoices).
+        À l'inverse, en ne mettant pas de Throw error, si erreur il y a, elle sera attrapée par le catch et affichée par le console.error(). Mais le script continue tout de même pour que les infos tasks et invoices soient envoyées en DB.
+        De plus, on a diminué le nombre d'erreurs possible grâce à l'ajout de la directive SQL UNIQUE (user_id, name) */
+        // throw error;
     }
 }
 
@@ -132,6 +135,8 @@ async function seedTasks(client) {
                 name VARCHAR(255),
                 status VARCHAR(255),
                 date DATE NOT NULL,
+                /* Cf seedListes pour comprendre cette directive SQL ci-dessous */
+                UNIQUE (list_id, name)
             );
         `;
 
@@ -156,7 +161,8 @@ async function seedTasks(client) {
 
     } catch (error) {
         console.error('Error seeding tasks:', error);
-        throw error;
+        /* Voir 'catch' de "seedListes" pour comprendre pourquoi on commente Throw Error */
+        // throw error;
     }
 }
 
@@ -172,7 +178,9 @@ async function seedInvoices(client) {
                 user_id UUID NOT NULL,
                 amount INT NOT NULL,
                 status VARCHAR(255) NOT NULL,
-                date DATE NOT NULL, 
+                date DATE NOT NULL,
+                /* Cf seedListes pour comprendre la directive SQL ci-dessous */
+                UNIQUE (user_id)
             );
         `;
 
@@ -198,6 +206,25 @@ async function seedInvoices(client) {
 
     } catch (error) {
         console.error('Error seeding invoices: ', error);
-        throw error;
+        /* Voir 'catch' de "seedListes" pour comprendre pourquoi on commente Throw Error */
+        // throw error;
     }
 }
+
+//! MAIN FUNCTION
+async function main() {
+    const client = await db.connect();
+
+    await seedUsers(client);
+    await seedListes(client);
+    await seedTasks(client);
+    await seedInvoices(client);
+
+    await client.end();
+    console.log("EVERYTHING POPULATE IN DB")
+}
+
+main().catch((err) => {
+    console.error(`An error occurred while attempting to seed the database:`, err);
+});
+

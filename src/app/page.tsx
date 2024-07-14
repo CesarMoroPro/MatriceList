@@ -1,5 +1,11 @@
 import Image from "next/image";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Success List - Eisenhower based',
+}
 
 export default function Home() {
   return (
@@ -21,12 +27,12 @@ export default function Home() {
                 <p className="mt-3">
                     Success List est la solution To Do List simple et sobre, basée sur la matrice d'<span className="custom-bg-tag-blue-200">Eisenhower</span>. 
                 </p>
-                    
-                <form className="mt-6" action="">
-                    <button className="bg-sky-500 text-white flex items-center p-2 hover:bg-sky-300 hover:text-sky-600">
-                        Se connecter &nbsp; <ArrowRightIcon className="h-5"/>
-                    </button>
-                </form>
+                    <Link
+                        href="/login">
+                        <p className="bg-sky-500 text-white flex items-center p-2 mt-6 hover:bg-sky-300 hover:text-sky-600">
+                            Se connecter &nbsp; <ArrowRightIcon className="h-5"/>
+                        </p>
+                    </Link>
             </div>
         </section>
 
