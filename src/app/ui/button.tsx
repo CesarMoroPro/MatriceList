@@ -7,7 +7,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export function Button({ children, className, ...rest }: ButtonProps) {
 
     return (
-        <button
+        <button type="submit"
             {...rest}
             className={className}
         >

@@ -5,6 +5,12 @@ import { authenticate } from '@/app/lib/actions';
 import { Button } from "./button";
 
 export default function LoginForm() {
+    //^ ÉTAPE 2 : 'formAction' est déclenchée et appelle 'authenticate', avec un argument automatique formData qui contient toutes les données du formulaire
+    /*
+        - formAction va déclencher la fonction 'authenticate' (Server Action dans le fichier /lib/actions.ts).
+        - errorMessage, qui vaut 'null' par défaut, contiendra un message d'erreur si une erreur se produit pendant l'authentification. Mais errorMessage vaut bien 'null' par défaut !
+        - undefined : argument optionnel pour la configuration ou l'état initial. Dans le cas d'un état initial (souvent ce cas lors de l'utilisation de ce hook), 'undefined' peut signifier qu'il n'y a pas d'état initial spécifique à fournir et le hook utilisera une valeur par défaut prédéfinie.
+    */
     const [errorMessage, formAction] = useFormState(
         authenticate, 
         undefined
@@ -14,6 +20,7 @@ export default function LoginForm() {
         /* formAction contiendra nativement l'objet formData contenant les données du formulaire.
         À l'envoi du formulaire, on déclenche formAction, donc le setter du formState
         */
+       //^ ÉTAPE 1 : À la soumission du formulaire, on déclenche formAction()
         <form action={formAction}>
             <div>
                 <h1>Merci de vous identifier pour continuer</h1>
