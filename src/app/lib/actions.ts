@@ -1,11 +1,10 @@
 /* Les Server Actions seront potentiellement utilisées dans des fichiers de rendu côté client. 
-Mais les Server Actions sont obligatoirement exécutées côté Serveir.
+Mais les Server Actions sont obligatoirement exécutées côté Serveur.
 Il est donc essentiel d'ajouter la directive 'use server' afin d'éviter le bug "loaders de webpack" */
 'use server';
 
 import { signIn } from '@/../auth';
 import { AuthError } from 'next-auth';
-import { redirect } from 'next/navigation';
 
 export async function authenticate(
     //^ ÉTAPES 1 ET 2 : dans le fichier 'ui/login-form.tsx'
@@ -18,7 +17,6 @@ export async function authenticate(
     try {
         console.log(formData);
         await signIn('credentials', formData);
-        redirect('/dashboard');
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
