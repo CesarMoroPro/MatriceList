@@ -1,11 +1,27 @@
 //* Pour que les variables suivants puisse être REQUIRE dans le fichier "seed.js" et non importés, il faut les exporter en fin de fichier avec `module.exports = {};`
 
+//! ATTENTION : pour ne pas créer d'erreurs lors du parse des credentials (plus tard avec next-auth et Zod), il faut impérativement utiliser des extensions existantes (.com, .fr, etc.).
+
 const users = [
+    {
+        id: "44bf2ef8-7220-45e3-a167-be714ca245ea",
+        firstname: "c",
+        name: "c",
+        email: "cesar@truc.com",
+        password: "cccccc"
+    },
+    {
+        id: "3384984b-64e2-4c23-901a-dcf75202bdfd",
+        firstname: "test",
+        name: "test",
+        email: "t@t.com",
+        password: "tttttt"
+    },
     {
         id: "410544b2-4001-4271-9855-fec4b6a6442a",
         firstname: "John",
         name: "Smith",
-        email: "johnsmith@test.killer",
+        email: "johnsmith@test.com",
         password: "user01"
     },
 
@@ -13,14 +29,14 @@ const users = [
         id: "3958dc9e-712f-4377-85e9-fec4b6a6442a",
         firstname: "Jane",
         name: "Smith",
-        email: "janesmith@test.wtf",
+        email: "janesmith@test.com",
         password: "user02"
     },
     {
         id: "3958dc9e-742f-4377-85e9-fec4b6a6442a",
         firstname: "Johnny",
         name: "Cash",
-        email: "johnnycash@test.rock",
+        email: "johnnycash@test.com",
         password: "user03"
     },
 ];

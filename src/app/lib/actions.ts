@@ -14,16 +14,24 @@ export async function authenticate(
     prevState: string | undefined,
     formData: FormData,
 ) {
+    console.log(formData);
     try {
-        console.log(formData);
+        /* Avec la fonction signIn, je passe l'objet formData dans à NextAuth > dans les `credentials` (> attendus en paramètre de la fonction `authorize` > dans le provider `Credentials`) */
+        console.log("Dans le try")
         await signIn('credentials', formData);
     } catch (error) {
+        console.log('On entre dans le CATCH');
+        console.log(error);
         if (error instanceof AuthError) {
             switch (error.type) {
-                case 'CredentialsSignin': 
+                case 'CredentialsSignin': {
+                    console.log(`INVALID CREDENDIALS switch CredentialsSignIn`);
                     return 'Invalid credentials.';
-                default:
+                }
+                default: {
+                    console.log(`WRONG switch default`);
                     return 'Something went wrong.';
+                }
             }
         }
         throw error;
