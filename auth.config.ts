@@ -1,5 +1,4 @@
 import type { NextAuthConfig } from 'next-auth';
-import path from 'path';
 
 export const authConfig = {
     pages: {

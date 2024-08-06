@@ -6,6 +6,7 @@ import { Button } from "./button";
 
 export default function LoginForm() {
     //^ ÉTAPE 2 : 'formAction' est déclenchée et appelle 'authenticate', avec un argument automatique formData qui contient toutes les données du formulaire
+    //^ ÉTAPE 3 dans le fichier /src/app/lib/actions.ts
     /*
         - formAction va déclencher la fonction 'authenticate' (Server Action dans le fichier /lib/actions.ts).
         - errorMessage, qui vaut 'null' par défaut, contiendra un message d'erreur si une erreur se produit pendant l'authentification. Mais errorMessage vaut bien 'null' par défaut !
@@ -37,7 +38,7 @@ export default function LoginForm() {
                                 className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
                                 id="email"
                                 type="email"
-                                name="email"
+                                name="email" // Attribut essentiel pour NextAuth
                                 placeholder="Entrez votre adresse mail"
                                 required
                             />
@@ -55,7 +56,7 @@ export default function LoginForm() {
                                 className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
                                 id="password"
                                 type="password"
-                                name="password"
+                                name="password" // Attribut essentiel pour NextAuth
                                 placeholder="Saisissez votre mot de passe"
                                 required
                                 minLength={6}
