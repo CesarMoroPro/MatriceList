@@ -44,7 +44,7 @@ export async function authenticate(
         //^ LOG 1 : OK
         console.log("\n LOG 1/ : Dans le try");       
 
-        const formDataEntries = {};
+        const formDataEntries: { [key: string]: any} = {};
         //^ LOG 2.A : OK
         console.log("\n LOG 2.A/ GO forEach")
         formData.forEach((value, key) => {
@@ -71,6 +71,7 @@ export async function authenticate(
         console.log("\n 5/ GO signIn");
         await signIn('credentials', {
             ...formDataEntries,
+            //* `redirect: false` permet d'empêcher la redirection automatique vers '/login' définie dans authConfig.pages.signIn.  
             redirect: false,
             callbackUrl: '/dashboard/user',
         });
