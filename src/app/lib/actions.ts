@@ -44,14 +44,18 @@ export async function authenticate(
         //^ LOG 1 : OK
         console.log("\n LOG 1/ : Dans le try");       
 
-        const formDataEntries: { [key: string]: any} = {};
+        const formDataEntries: { [key: string]: string | File } = {};
         //^ LOG 2.A : OK
         console.log("\n LOG 2.A/ GO forEach")
         formData.forEach((value, key) => {
             //^ LOG 2.B : OK
             console.log("- LOG 2.B/ forEach : ", key + " ===> " + value);
-            //console.log(formData.get(key));          
-            formDataEntries[key] = value;
+            //console.log(formData.get(key));
+            if (typeof value === 'string') {
+                formDataEntries[key] = value;
+            } else if (value instanceof File) {
+                formDataEntries[key] = value;
+            }
         });
 
         //^ LOG 3 : OK
