@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 import Credentials from "next-auth/providers/credentials";
-/* Test pour fix déploiement failed */
 import { z } from 'zod';
 import { sql } from "@vercel/postgres";
 import { User } from "@/app/lib/definitions";

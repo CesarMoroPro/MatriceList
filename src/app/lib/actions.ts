@@ -4,9 +4,8 @@ Il est donc essentiel d'ajouter la directive 'use server' afin d'éviter le bug 
 'use server';
 
 import { signIn } from '@/../auth';
-import { log } from 'console';
 import { AuthError } from 'next-auth';
-import { object } from 'zod';
+import { redirect } from 'next/navigation';
 
 export async function authenticate(
     //^ ÉTAPES 1 ET 2 : dans le fichier 'ui/login-form.tsx'
@@ -59,7 +58,7 @@ export async function authenticate(
         });
 
         //^ LOG 3 : OK
-        console.log("\n LOG 3/ : après le forEach : ", formDataEntries)
+        console.log("\n LOG 3/ : après le forEach : formDataEntries => " , formDataEntries)
         
         // const email = formData.get('email');
         // const password = formData.get('password');
@@ -67,22 +66,42 @@ export async function authenticate(
         //^ LOG 4 : OK
         console.log("\n LOG 4/ : SignIn Params:", {
             formDataEntries,
-            callbackUrl: '/dashboard/user',
+            callbackUrl: "'/dashboard/user'. ATTENTION ici en dur. Ne signifie pas que callbackUrl contient bien cette valeur dans l'option de signIn lors de son appel."
         });
         
         //^ LOG 5 : NOK !!! Le callback renvoie '/login' d'après les erreurs dans LOG 6 et suivants
         // Sortie erreur : [auth][warn][debug-enabled] Read more: https://warnings.authjs.dev#debug-enabled
-        console.log("\n 5/ GO signIn");
-        await signIn('credentials', {
+        console.log("\n LOG 5/ GO signIn");
+        const response = await signIn('credentials', {
             ...formDataEntries,
             //* `redirect: false` permet d'empêcher la redirection automatique vers '/login' définie dans authConfig.pages.signIn.  
             redirect: false,
             callbackUrl: '/dashboard/user',
         });
+
+        //^ LOG 6 : FIN DE SIGNIN
+        console.log("\n LOG 6/ END signIn")
+        
+        //^ LOG 7 : VALEUR DE response DONC DE signIn
+        /* Ici la console affiche "LOG 7/ RESPONSE ET TYPE DE signIn http://127.0.0.1:3000/login" */
+        console.log(`\n\n LOG 7/ TYPE DE response : ${typeof(response)}. \n CONTENU DE response : ${response}\n\n`);
+
+        /* On arrive à ce stade sans aucune erreur en console, et on n'entre plus dans le CATCH. Donc le TRY fonctionne, y compris l'exécution de la fonction signIn.
+        * Pourtant, la redirection ne se fait toujours pas : on reste sur la page (locale) http://127.0.0.1:3000/login. Pourquoi ? */
+        /**
+         * L'objet "response" est censé contenir plusieurs propriétés, dont "ok", "url" ou "error".
+         * Or, le LOG 7 nous montre que "response" (donc la réponse de signIn()) ne contient pas un objet mais une simple string.
+         ** Dans ce cas, on peut importer la fonction { redirect } de 'next/navigation' pour programmer une redirection manuelle
+         */
+
+        if (response && typeof response === 'string') {
+            redirect('/dashboard/user');
+        }
+
     } catch (error) {
-        //^ LOG 6 : OK
-        console.log('\n LOG 5/ On entre dans le CATCH');
-        //^ LOG 7
+        //^ LOG 400 : OK
+        console.log('\n LOG 7/ On entre dans le CATCH');
+        //^ LOG 401
         console.log();
         console.log(error);
         if (error instanceof AuthError) {
